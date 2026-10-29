@@ -3,3 +3,5 @@ __pycache__/
 .pytest_cache/
 .claude/settings.local.json
 Captura de pantalla*.png
+datos/
+.ipynb_checkpoints/
