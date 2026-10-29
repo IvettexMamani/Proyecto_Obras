@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "invierte-obras": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "C:/Users/USUARIO/Documents/CIENCIA DE DATOS/CLASES PYTHON/PHYTON INTERMEDIO/Proyecto Invierte",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "UV_SYSTEM_CERTS": "1"
+      }
+    },
+    "fetch": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "--with",
+        "truststore",
+        "--from",
+        "mcp-server-fetch",
+        "python",
+        "-c",
+        "import truststore; truststore.inject_into_ssl(); from mcp_server_fetch import main; main()"
+      ],
+      "env": {
+        "UV_SYSTEM_CERTS": "1"
+      }
+    }
+  }
+}
