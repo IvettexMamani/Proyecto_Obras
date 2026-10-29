@@ -65,14 +65,20 @@ verdad la cifra revisada a mano, **36**. La respuesta del MCP (37) queda dentro 
 como acierto, y los dos CSV de resultados se volvieron a calificar con `uv run evaluar.py --recalificar`. Para el monto
 de Tacna, la verdad (S/ 499,646,766.07) sale de las 37 obras del listado.
 
-En la misma ficha SSI coinciden también otras dos cifras de `detalle_inversion`: el costo de inversión actualizado,
-«(a) 632,167,753.73», y los beneficiarios, «324,498».
+En la misma ficha SSI del CUI 2192844 revisé a mano otras dos cifras que devuelve `detalle_inversion`:
 
-La misma ficha explica una diferencia entre las dos fuentes de Invierte.pe. Para este CUI, el Banco de Inversiones
-(`buscar_inversiones`) da un costo de S/ 633,486,449.64, que en la ficha es el **costo total** (a+b+c+d) e incluye
-S/ 1,318,695.91 de costo de controversias. Por eso en `buscar_inversiones` ese campo se llama ahora
-`costo_total_actualizado`, para que el modelo no mezcle las dos cifras. La ficha también confirma el registro de la Ley
-31589: obra paralizada el 10/04/2024 por resolución de contrato.
+| Cifra | Ficha web SSI | `detalle_inversion` (MCP) | ¿Coincide? |
+|---|---|---|---|
+| Costo total de la inversión actualizado (a+b+c+d) | S/ 633,486,449.64 | `costo_total_actualizado`: 633,486,449.64 | Sí |
+| Beneficiarios (habitantes) | 324,498 | `beneficiarios`: 324,498 | Sí |
+
+En la ficha hay dos costos que se confunden con facilidad. El **costo de inversión actualizado (a)** es
+S/ 632,167,753.73, y el **costo total (a+b+c+d)** es S/ 633,486,449.64. La diferencia son S/ 1,318,695.91 de costo de
+controversias (c), porque el control concurrente (b) y la carta fianza (d) están en cero. Al principio
+`detalle_inversion` solo devolvía (a), mientras que el Banco de Inversiones (`buscar_inversiones`) daba el total con el
+nombre «costo actualizado». Así, un modelo podía citar dos cifras distintas para el mismo CUI. Ahora la herramienta
+devuelve los cuatro componentes y el `costo_total_actualizado`, y las dos herramientas coinciden en el total. La ficha
+también confirma el registro de la Ley 31589: obra paralizada el 10/04/2024 por resolución de contrato.
 
 ## Conclusión
 

@@ -58,6 +58,7 @@ def test_detalle_inversion():
     assert "DANIEL ALCIDES CARRI" in r["nombre"]
     assert r["monto_viable"] == pytest.approx(445_775_154.32, abs=0.01)
     assert r["fecha_viabilidad"] == "2021-12-22"
+    assert r["costo_total_actualizado"] >= r["costo_actualizado"]
     assert r["ficha_url"].endswith(f"codigo={CUI_HOSPITAL_TACNA}&tipo=2")
 
 

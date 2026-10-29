@@ -390,8 +390,8 @@ async def buscar_inversiones(
                 "departamento": "LocalizacionDepartamento",
                 "funcion": "Funcion",
                 "monto_viable": "MontoAlternativa",
-                # costo total actualizado: incluye control concurrente, controversias y carta fianza;
-                # el costo_actualizado de detalle_inversion no los incluye
+                # costo total (a+b+c+d): el mismo costo_total_actualizado de detalle_inversion
+                # (su costo_actualizado es solo (a))
                 "costo_total_actualizado": "Costo",
                 "pia_anio_vigente": "PiaActual",
                 "pim_anio_vigente": "PimActual",
@@ -419,7 +419,8 @@ async def detalle_inversion(
 ) -> dict[str, Any]:
     """Ficha de seguimiento de una inversión (SSI de Invierte.pe) a partir de su CUI.
 
-    Incluye costos, devengado acumulado y del año, fechas de ejecución, primer y último mes
+    Incluye costos (el actualizado (a) y el total (a+b+c+d), que suma control concurrente, controversias
+    y carta fianza), devengado acumulado y del año, fechas de ejecución, primer y último mes
     con devengado y el registro de obras paralizadas de la Ley 31589. Un CUI puede agrupar
     varias obras, así que un devengado reciente no prueba que una obra concreta esté activa.
     """
@@ -457,6 +458,9 @@ async def detalle_inversion(
             "modalidad_ejecucion": "MODAL_EJEC",
             "monto_viable": "MTO_VIABLE",
             "costo_actualizado": "COSTO_ACTUALIZADO",
+            "costo_control_concurrente": "MTO_CCONCURR_EJE",
+            "costo_controversias": "MTO_LAUDO",
+            "monto_carta_fianza": "MTO_CartFza",
             "pim_anio_vigente": "PIM_ANO_VIGENTE",
             "devengado_anio_vigente": "DEV_ANO_VIGENTE",
             "devengado_acumulado": "DEV_ACUMULADO",
@@ -475,6 +479,10 @@ async def detalle_inversion(
         },
     )
     detalle["cui"] = cui  # la ficha lo trae como número; buscar_inversiones, como texto
+    # como en la ficha web: costo total (a+b+c+d) = actualizado + control concurrente + controversias + carta fianza
+    detalle["costo_total_actualizado"] = round(
+        sum(d.get(k) or 0 for k in ("COSTO_ACTUALIZADO", "MTO_CCONCURR_EJE", "MTO_LAUDO", "MTO_CartFza")), 2
+    )
     costo = d.get("COSTO_ACTUALIZADO") or 0
     if costo:
         acumulado = d.get("DEV_ACUMULADO") or 0
