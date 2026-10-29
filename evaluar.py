@@ -2,6 +2,7 @@
 
     uv run evaluar.py                                   # memoria y mcp, con Haiku
     uv run evaluar.py --modos memoria mcp web --modelo sonnet
+    uv run evaluar.py --recalificar resultados.csv      # vuelve a calificar con las verdades actuales, sin llamar a Claude
 
 Cada pregunta se le hace a Claude Code en modo no interactivo (claude -p) y debe responder un JSON con el valor.
 Escribe resultados.csv y cuenta cuántas acierta, cuántas se equivoca y en cuántas reconoce que no sabe.
@@ -44,9 +45,16 @@ def preguntar(pregunta, modo, modelo):
 
 
 def calificar(valor, verdad, tolerancia):
-    if valor is None:
+    if valor is None or pd.isna(valor):
         return "no sabe"
     return "acierta" if abs(valor - verdad) <= tolerancia else "se equivoca"
+
+
+def resumir(res):
+    print("\n" + res.pivot(index="id", columns="modo", values="valor").to_string())
+    tabla = res.groupby("modo").resultado.value_counts().unstack(fill_value=0)
+    tabla["segundos"] = res.groupby("modo").segundos.mean().round(1)
+    print("\n" + tabla.to_string())
 
 
 if __name__ == "__main__":
@@ -55,7 +63,18 @@ if __name__ == "__main__":
     p.add_argument("--modelo", default="haiku")
     p.add_argument("--preguntas", default=str(AQUI / "preguntas.csv"))
     p.add_argument("--paralelo", type=int, default=4)
+    p.add_argument("--recalificar", metavar="RESULTADOS_CSV", help="recalifica ese archivo y no llama a Claude")
     a = p.parse_args()
+
+    if a.recalificar:
+        res = pd.read_csv(a.recalificar)
+        verdades = pd.read_csv(a.preguntas).set_index("id")
+        res["verdad"] = res.id.map(verdades.verdad)
+        res["resultado"] = [calificar(v, verdades.verdad[i], verdades.tolerancia[i]) for i, v in zip(res.id, res.valor)]
+        res.to_csv(a.recalificar, index=False)
+        resumir(res)
+        raise SystemExit
+
     if "mcp" in a.modos and not (AQUI / ".mcp.json").exists():
         raise SystemExit("Falta .mcp.json con el servidor invierte-obras.")
 
@@ -69,8 +88,4 @@ if __name__ == "__main__":
              for (q, m), r in zip(casos, respuestas)]
     res = pd.DataFrame(filas)
     res.to_csv(AQUI / "resultados.csv", index=False)
-
-    print("\n" + res.pivot(index="id", columns="modo", values="valor").to_string())
-    tabla = res.groupby("modo").resultado.value_counts().unstack(fill_value=0)
-    tabla["segundos"] = res.groupby("modo").segundos.mean().round(1)
-    print("\n" + tabla.to_string())
+    resumir(res)

@@ -47,15 +47,26 @@ contra MCP, está en `resultados_base.csv` y dio lo mismo: memoria 0 de 10 (10 �
 Hay que tener en cuenta que los conteos de INFOBRAS cambian a diario: las verdades de `preguntas.csv` valen para el
 28/10/2026, y por eso las tolerancias de los conteos nacionales son más amplias.
 
-## Dos cifras del MCP comprobadas en la web
+## Cifras del MCP comprobadas a mano en la web
 
-Las dos son de la ficha web de seguimiento (SSI) del CUI **2192844**, el Hospital Hipólito Unanue de Tacna, abierta en el
-navegador el 28/10/2026: <https://ofi5.mef.gob.pe/ssi/Ssi/Index?codigo=2192844&tipo=2>
+Mis dos preguntas, `paralizadas_tacna` y `devengado_unanue`, las revisé a mano el 28/10/2026 en las páginas web
+oficiales:
 
-| Cifra | `detalle_inversion` (MCP) | Ficha web SSI | ¿Coincide? |
-|---|---|---|---|
-| Costo de inversión actualizado | S/ 632,167,753.73 | «COSTO DE INVERSIÓN ACTUALIZADO (S/) (a) 632,167,753.73» | Sí |
-| Beneficiarios | 324,498 | «BENEFICIARIOS (HABITANTES) 324,498» | Sí |
+| Pregunta | Página web | Valor en la web | Respuesta del MCP | ¿Coincide? |
+|---|---|---|---|---|
+| `devengado_unanue`: devengado acumulado del CUI 2192844 | [Ficha SSI](https://ofi5.mef.gob.pe/ssi/Ssi/Index?codigo=2192844&tipo=2) | S/ 289,106,891.76 | S/ 289,106,891.76 | Sí, exacto |
+| `paralizadas_tacna`: obras paralizadas en Tacna | [Mapa de INFOBRAS](https://infobras.contraloria.gob.pe/InfobrasWeb/Mapa/Index) | **36** | 37 | Difiere en 1 |
+
+La diferencia en Tacna no es un error del MCP. A las 21:05, la API que usa el propio portal seguía devolviendo 37 obras,
+tanto en el conteo por departamento como en el listado, donde aparecen las 37 con su código INFOBRAS. Es decir, el mapa
+muestra una obra menos que el buscador del mismo sistema, probablemente porque solo dibuja las obras que tienen
+ubicación registrada (el listado no trae coordenadas, así que no se puede confirmar). En `preguntas.csv` dejé como
+verdad la cifra revisada a mano, **36**. La respuesta del MCP (37) queda dentro de la tolerancia de 1, así que se cuenta
+como acierto, y los dos CSV de resultados se volvieron a calificar con `uv run evaluar.py --recalificar`. Para el monto
+de Tacna, la verdad (S/ 499,646,766.07) sale de las 37 obras del listado.
+
+En la misma ficha SSI coinciden también otras dos cifras de `detalle_inversion`: el costo de inversión actualizado,
+«(a) 632,167,753.73», y los beneficiarios, «324,498».
 
 La misma ficha explica una diferencia entre las dos fuentes de Invierte.pe. Para este CUI, el Banco de Inversiones
 (`buscar_inversiones`) da un costo de S/ 633,486,449.64, que en la ficha es el **costo total** (a+b+c+d) e incluye
