@@ -3,8 +3,6 @@
     "invierte-obras": {
       "command": "uv",
       "args": [
-        "--directory",
-        "C:/Users/USUARIO/Documents/CIENCIA DE DATOS/CLASES PYTHON/PHYTON INTERMEDIO/Proyecto Invierte",
         "run",
         "server.py"
       ],
